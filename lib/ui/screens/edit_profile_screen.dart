@@ -1,6 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:task_manager_app/data/data.network_caller/network_caller.dart';
+import 'package:task_manager_app/data/data.network_caller/network_response.dart';
+import 'package:task_manager_app/data/data.utility/urls.dart';
+import 'package:task_manager_app/data/models/user_model.dart';
+import 'package:task_manager_app/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app/ui/widgets/body_background.dart';
 import 'package:task_manager_app/ui/widgets/profile_summary_card.dart';
+import 'package:task_manager_app/ui/widgets/snack_message.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -10,13 +19,33 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _firstNameTEController = TextEditingController();
+  final TextEditingController _lastNameTEController = TextEditingController();
+  final TextEditingController _mobileTEController = TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
+
+  bool _updateProfileInProgress = false;
+
+  XFile? photo;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailTEController.text = AuthController.user?.email ?? '';
+    _firstNameTEController.text = AuthController.user?.firstName ?? '';
+    _lastNameTEController.text = AuthController.user?.lastName ?? '';
+    _mobileTEController.text = AuthController.user?.mobile ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
+    //TODO: Add form validation
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            ProfileSummaryCard(
+            const ProfileSummaryCard(
               enableOnTap: false,
             ),
             Expanded(
@@ -42,6 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           height: 16,
                         ),
                         TextFormField(
+                          controller: _emailTEController,
                           decoration: const InputDecoration(
                             hintText: 'Email',
                           ),
@@ -50,6 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           height: 8,
                         ),
                         TextFormField(
+                          controller: _firstNameTEController,
                           decoration: const InputDecoration(
                             hintText: 'First Name',
                           ),
@@ -58,6 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           height: 8,
                         ),
                         TextFormField(
+                          controller: _lastNameTEController,
                           decoration: const InputDecoration(
                             hintText: 'Last Name',
                           ),
@@ -66,6 +98,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           height: 8,
                         ),
                         TextFormField(
+                          controller: _mobileTEController,
                           decoration: const InputDecoration(
                             hintText: 'Mobile',
                           ),
@@ -74,16 +107,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           height: 8,
                         ),
                         TextFormField(
+                          controller: _passwordTEController,
                           obscureText: true,
                           decoration: const InputDecoration(
-                            hintText: 'Password',
+                            hintText: 'Password (optional)',
                           ),
                         ),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            child: Icon(Icons.arrow_circle_right_outlined),
+                          child: Visibility(
+                            visible: _updateProfileInProgress == false,
+                            replacement: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: updateProfile,
+                              child:
+                                  const Icon(Icons.arrow_circle_right_outlined),
+                            ),
                           ),
                         ),
                       ],
@@ -98,44 +139,107 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Future<void> updateProfile() async {
+    _updateProfileInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    String? photoInBase64;
+    Map<String, dynamic> inputData = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "password": _passwordTEController.text,
+      "photo": ""
+    };
+
+    if (_passwordTEController.text.isNotEmpty) {
+      inputData["password"] = _passwordTEController.text;
+    }
+
+    if (photo != null) {
+      List<int> imageBytes = await photo!.readAsBytes();
+      photoInBase64 = base64Encode(imageBytes);
+      inputData['photo'] = photoInBase64;
+    }
+
+    final NetworkResponse response = await NetworkCaller().postRequest(
+      Urls.updateProfile,
+      body: inputData,
+    );
+    _updateProfileInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+    if (response.isSuccess) {
+      AuthController.updateUserInformation(UserModel(
+        email: _emailTEController.text.trim(),
+        firstName: _firstNameTEController.text.trim(),
+        lastName: _lastNameTEController.text.trim(),
+        mobile: _mobileTEController.text.trim(),
+        photo: photoInBase64 ?? AuthController.user?.photo,
+      ));
+      if (mounted) {
+        showSnackMessage(context, 'Update profile successful');
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(context, 'Update profile failed! Try again.');
+      }
+    }
+  }
+
   Container photoPickerField() {
     return Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8)
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex : 1,
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      bottomLeft: Radius.circular(8),
-                                  )
-                                ),
-                                alignment: Alignment.center,
-                                child: const Text('Photo',style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Container(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 16.0),
-                                  child: Text('empty'),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+      height: 50,
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(8)),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(
+              height: 50,
+              decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  )),
+              alignment: Alignment.center,
+              child: const Text(
+                'Photo',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: InkWell(
+              onTap: () async {
+                final XFile? image = await ImagePicker()
+                    .pickImage(source: ImageSource.camera, imageQuality: 50);
+                if (image != null) {
+                  photo = image;
+                  if (mounted) {
+                    setState(() {});
+                  }
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.only(left: 16),
+                child: Visibility(
+                  visible: photo == null,
+                  replacement: Text(photo?.name ?? ''),
+                  child: const Text('Select a photo'),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
