@@ -6,6 +6,7 @@ import 'package:task_manager_app/data/models/task_count.dart';
 import 'package:task_manager_app/data/models/task_count_summary_list_model.dart';
 import 'package:task_manager_app/data/models/task_list_model.dart';
 import 'package:task_manager_app/ui/screens/add_new_task_screen.dart';
+import 'package:task_manager_app/ui/widgets/body_background.dart';
 import 'package:task_manager_app/ui/widgets/profile_summary_card.dart';
 import 'package:task_manager_app/ui/widgets/summary_card.dart';
 import 'package:task_manager_app/ui/widgets/task_item_card.dart';
@@ -78,62 +79,68 @@ class _NewTasksScreenState extends State<NewTasksScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const ProfileSummaryCard(),
-            Visibility(
-              visible: getNewTaskInProgress == false &&
-                  (taskCountSummaryListModel.taskCountList?.isNotEmpty ??
-                      false),
-              replacement: const LinearProgressIndicator(),
-              child: SizedBox(
-                height: 120,
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount:
-                        taskCountSummaryListModel.taskCountList?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      TaskCount taskCount =
-                          taskCountSummaryListModel.taskCountList![index];
-                      return FittedBox(
-                        child: SummaryCard(
-                          count: taskCount.sum.toString(),
-                          title: taskCount.sId ?? '',
-                        ),
-                      );
-                    }),
-              ),
-            ),
-            Expanded(
-              child: Visibility(
-                visible: getNewTaskInProgress == false,
-                replacement: const Center(child: CircularProgressIndicator()),
-                child: RefreshIndicator(
-                  onRefresh: getNewTaskList,
+      body: BodyBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const ProfileSummeryCard(),
+              Visibility(
+                visible: getNewTaskInProgress == false &&
+                    (taskCountSummaryListModel.taskCountList?.isNotEmpty ??
+                        false),
+                replacement: const LinearProgressIndicator(),
+                child: SizedBox(
+                  height: 120,
                   child: ListView.builder(
-                    itemCount: taskListModel.taskList?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      return TaskItemCard(
-                        task: taskListModel.taskList![index],
-                        onStatusChange: (){
-                          getNewTaskList();
-                        },
-                        showProgress: (inProgress){
-                          getNewTaskInProgress = inProgress;
-                          if(mounted){
-                            setState(() {});
-                          }
-                        },
-                      );
-                    },
+                      scrollDirection: Axis.horizontal,
+                      itemCount:
+                          taskCountSummaryListModel.taskCountList?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        TaskCount taskCount =
+                            taskCountSummaryListModel.taskCountList![index];
+                        return FittedBox(
+                          child: SummaryCard(
+                            count: taskCount.sum.toString(),
+                            title: taskCount.sId ?? '',
+                          ),
+                        );
+                      }),
+                ),
+              ),
+              Expanded(
+                child: Visibility(
+                  visible: getNewTaskInProgress == false,
+                  replacement: const Center(child: CircularProgressIndicator()),
+                  child: RefreshIndicator(
+                    onRefresh: getNewTaskList,
+                    child: ListView.builder(
+                      itemCount: taskListModel.taskList?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        return TaskItemCard(
+                          task: taskListModel.taskList![index],
+                          onStatusChange: (){
+                            getNewTaskList();
+                          },
+                          showProgress: (inProgress){
+                            getNewTaskInProgress = inProgress;
+                            if(mounted){
+                              setState(() {});
+                            }
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
+
+

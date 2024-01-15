@@ -23,6 +23,9 @@ class TaskManager_App extends StatelessWidget {
               borderSide: BorderSide.none,
             ),
           ),
+          appBarTheme: const AppBarTheme(
+            color: Colors.green,
+          ),
           textTheme: const TextTheme(
             titleLarge: TextStyle(
               fontSize: 32,
@@ -34,9 +37,21 @@ class TaskManager_App extends StatelessWidget {
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 10),
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.black,
               //maximumSize: const Size.fromWidth(double.infinity),
             ),
-          )),
+          ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.green,
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.black,
+        ),
+      ),
     );
   }
 }

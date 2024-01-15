@@ -16,7 +16,7 @@ class _CancelledTasksScreenState extends State<CancelledTasksScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const ProfileSummaryCard(),
+            const ProfileSummeryCard(),
             Expanded(
               child: ListView.builder(
                 itemCount: 5,

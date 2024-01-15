@@ -45,8 +45,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const ProfileSummaryCard(
-              enableOnTap: false,
+            ProfileSummeryCard(
+              ///enableOnTap: false,
             ),
             Expanded(
               child: BodyBackground(
@@ -150,7 +150,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       "firstName": _firstNameTEController.text.trim(),
       "lastName": _lastNameTEController.text.trim(),
       "password": _passwordTEController.text,
-      "photo": ""
+      //"photo": ""
     };
 
     if (_passwordTEController.text.isNotEmpty) {
@@ -177,7 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         firstName: _firstNameTEController.text.trim(),
         lastName: _lastNameTEController.text.trim(),
         mobile: _mobileTEController.text.trim(),
-        photo: photoInBase64 ?? AuthController.user?.photo,
+        photo: photoInBase64 ?? AuthController.user?.photo
       ));
       if (mounted) {
         showSnackMessage(context, 'Update profile successful');
